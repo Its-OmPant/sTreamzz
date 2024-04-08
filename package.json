@@ -1,0 +1,15 @@
+{
+	"name": "streamzz",
+	"version": "1.0.0",
+	"description": "A backend for sTreamzz web app",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"dev": "nodemon src/index.js"
+	},
+	"author": "Om Pant",
+	"license": "ISC",
+	"devDependencies": {
+		"nodemon": "^3.1.0"
+	}
+}
