@@ -13,13 +13,17 @@ const uploadOnCloudinary = async (localFilePath) => {
 		const response = await cloudinary.uploader.upload(localFilePath, {
 			resource_type: "auto",
 		});
+
 		console.log(
 			"File uploaded to cloudinary successfully at URL:  ",
 			response.url
 		);
+		fs.unlinkSync(localFilePath);
 		return response;
 	} catch (error) {
 		fs.unlinkSync(localFilePath);
+		console.log("images Unlinked due to error in multer");
+		console.log("Error Occured :: ", error);
 		return null;
 	}
 };
