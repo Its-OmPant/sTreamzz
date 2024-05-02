@@ -208,4 +208,125 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 	}
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+// controller to change user Password
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+	const { oldPassword, newPassword } = req.body;
+
+	const user = await User.findById(req.user?._id);
+
+	const isPasswordCorrect = await user.comparePassword(oldPassword);
+
+	if (!isPasswordCorrect) {
+		throw new ApiError(400, "Incorrect Old Password");
+	}
+
+	user.password = newPassword;
+	await user.save({ validateBeforeSave: false });
+	return res
+		.status(200)
+		.json(new ApiResponse(200, {}, "Password Changed Successfully"));
+});
+
+// controller to get current user
+const getCurrentUser = asyncHandler(async (req, res) => {
+	const user = req.user;
+	return res
+		.status(200)
+		.json(new ApiResponse(200, user, "Current user fetched Successfully"));
+});
+
+// controller to update fullName and email
+const updateAccountDetails = asyncHandler(async (req, res) => {
+	const { fullName, email } = req.body;
+
+	if (!fullName || !email) {
+		throw new ApiError(400, "All Fields are required");
+	}
+
+	const user = await User.findByIdAndUpdate(
+		req.user?.id,
+		{
+			$set: {
+				fullName,
+				email,
+			},
+		},
+		{ new: true }
+	).select("-password");
+
+	return res
+		.status(200)
+		.json(new ApiResponse(200, user, "Account details updated successfully"));
+});
+
+// controller to update Avatar File
+const updateUserAvatar = asyncHandler(async (req, res) => {
+	const avatarLocalFilePath = req.file?.path;
+
+	if (!avatarLocalFilePath) {
+		throw new ApiError(400, "Avatar Image not provided");
+	}
+	const avatar = await uploadOnCloudinary(avatarLocalFilePath);
+
+	if (!avatar.url) {
+		throw new ApiError(400, "Error while uploading avatar");
+	}
+
+	const user = await User.findByIdAndUpdate(
+		req.user?._id,
+		{
+			$set: {
+				avatar: avatar.url,
+			},
+		},
+		{ new: true }
+	).select("-password");
+
+	// Todo : delete old image after  successful update from cloudinary by creating a utility fn
+
+	return res
+		.status(200)
+		.json(new ApiResponse(200, user, "Avatar image updated successfully"));
+});
+
+// controller to update Cover Image
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+	const coverImageLocalFilePath = req.file?.path;
+
+	if (!coverImageLocalFilePath) {
+		throw new ApiError(400, "Cover Image not provided");
+	}
+	const coverImage = await uploadOnCloudinary(coverImageLocalFilePath);
+
+	if (!coverImage.url) {
+		throw new ApiError(400, "Error while uploading cover Image");
+	}
+
+	const user = await User.findByIdAndUpdate(
+		req.user?._id,
+		{
+			$set: {
+				coverImage: coverImage.url,
+			},
+		},
+		{ new: true }
+	).select("-password");
+
+	// Todo : delete old image from cloudinary after  successful update  by creating a utility fn
+
+	return res
+		.status(200)
+		.json(new ApiResponse(200, user, "Cover Image updated successfully"));
+});
+
+export {
+	registerUser,
+	loginUser,
+	logoutUser,
+	refreshAccessToken,
+	changeCurrentPassword,
+	getCurrentUser,
+	updateAccountDetails,
+	updateUserAvatar,
+	updateUserCoverImage,
+};
