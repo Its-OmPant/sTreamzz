@@ -22,7 +22,7 @@ const uploadOnCloudinary = async (localFilePath) => {
 		return response;
 	} catch (error) {
 		fs.unlinkSync(localFilePath);
-		console.log("images Unlinked due to error in multer");
+		console.log("images Unlinked due to error in cloudinary");
 		console.log("Error Occured :: ", error);
 		return null;
 	}
